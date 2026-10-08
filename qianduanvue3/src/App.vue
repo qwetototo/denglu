@@ -1,10 +1,20 @@
 <template>
   <div class="page">
     <div class="login-card">
-      <h1>欢迎回来</h1>
-      <p class="subtitle">请使用用户名和密码登录</p>
+      <h1>{{ isRegister ? '创建账号' : '欢迎回来' }}</h1>
+      <p class="subtitle">{{ isRegister ? '注册后即可使用账号登录' : '请使用用户名和密码登录' }}</p>
 
-      <form @submit.prevent="handleLogin" novalidate>
+      <div class="mode-switch" role="tablist">
+        <button type="button" :class="{ active: !isRegister }" @click="switchMode(false)">登录</button>
+        <button type="button" :class="{ active: isRegister }" @click="switchMode(true)">注册</button>
+      </div>
+
+      <form @submit.prevent="handleSubmit" novalidate>
+        <div v-if="isRegister" class="form-group">
+          <label for="name">姓名</label>
+          <input id="name" type="text" v-model="name" class="input-field" :class="{ error: errors.name }" placeholder="请输入姓名" autocomplete="name" @input="clearError('name')" />
+          <div class="error-message" :style="{ visibility: errors.name ? 'visible' : 'hidden' }">⚠️ {{ errors.name || '&nbsp;' }}</div>
+        </div>
         <!-- 用户名 -->
         <div class="form-group">
           <label for="username">用户名</label>
@@ -33,7 +43,7 @@
             class="input-field"
             :class="{ error: errors.password }"
             placeholder="请输入密码"
-            autocomplete="current-password"
+            :autocomplete="isRegister ? 'new-password' : 'current-password'"
             @input="clearError('password')"
           />
           <div class="error-message" :style="{ visibility: errors.password ? 'visible' : 'hidden' }">
@@ -41,9 +51,15 @@
           </div>
         </div>
 
+        <div v-if="isRegister" class="form-group">
+          <label for="confirmPassword">确认密码</label>
+          <input id="confirmPassword" type="password" v-model="confirmPassword" class="input-field" :class="{ error: errors.confirmPassword }" placeholder="请再次输入密码" autocomplete="new-password" @input="clearError('confirmPassword')" />
+          <div class="error-message" :style="{ visibility: errors.confirmPassword ? 'visible' : 'hidden' }">⚠️ {{ errors.confirmPassword || '&nbsp;' }}</div>
+        </div>
+
         <button type="submit" class="login-button" :disabled="isLoading">
           <span v-if="isLoading" class="spinner"></span>
-          {{ isLoading ? '登录中...' : '登 录' }}
+          {{ isLoading ? (isRegister ? '注册中...' : '登录中...') : (isRegister ? '注 册' : '登 录') }}
         </button>
       </form>
 
@@ -61,11 +77,14 @@
 <script setup>
 import { ref, reactive } from 'vue'
 
+const isRegister = ref(false)
 const username = ref('')
 const password = ref('')
+const name = ref('')
+const confirmPassword = ref('')
 const isLoading = ref(false)
 
-const errors = reactive({ username: '', password: '' })
+const errors = reactive({ username: '', password: '', name: '', confirmPassword: '' })
 const message = reactive({ text: '', type: 'success' })
 
 function clearError(field) {
@@ -73,10 +92,18 @@ function clearError(field) {
   message.text = ''
 }
 
+function switchMode(register) {
+  isRegister.value = register
+  message.text = ''
+  Object.keys(errors).forEach((key) => { errors[key] = '' })
+}
+
 function validateForm() {
   let ok = true
   errors.username = ''
   errors.password = ''
+  errors.name = ''
+  errors.confirmPassword = ''
 
   const u = username.value.trim()
   if (!u) {
@@ -94,21 +121,26 @@ function validateForm() {
     errors.password = '密码至少为6位字符'
     ok = false
   }
+  if (isRegister.value) {
+    if (!name.value.trim()) { errors.name = '姓名不能为空'; ok = false }
+    if (confirmPassword.value !== password.value) { errors.confirmPassword = '两次输入的密码不一致'; ok = false }
+  }
   return ok
 }
 
-async function handleLogin() {
+async function handleSubmit() {
   message.text = ''
   if (!validateForm()) return
 
   isLoading.value = true
   try {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(isRegister.value ? '/api/auth/register' : '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username: username.value.trim(),
-        password: password.value
+        password: password.value,
+        ...(isRegister.value ? { name: name.value.trim() } : {})
       })
     })
 
@@ -122,7 +154,12 @@ async function handleLogin() {
 
     if (res.ok) {
       message.type = 'success'
-      message.text = data.message || '登录成功！欢迎回来 👋'
+      message.text = data.message || (isRegister.value ? '注册成功，请登录' : '登录成功！欢迎回来 👋')
+      if (isRegister.value) {
+        isRegister.value = false
+        password.value = ''
+        confirmPassword.value = ''
+      }
       console.log('后端返回:', data)
       // 通常这里保存 token 并跳转，例如：
       // localStorage.setItem('token', data.token)
@@ -174,6 +211,29 @@ h1 {
   font-size: 0.95rem;
   color: #64748b;
   margin: 0 0 2rem;
+}
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  margin-bottom: 1.5rem;
+  background: #f1f5f9;
+  border-radius: 0.75rem;
+}
+.mode-switch button {
+  border: 0;
+  border-radius: 0.55rem;
+  padding: 0.6rem;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.mode-switch button.active {
+  color: #1d4ed8;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
 }
 
 .form-group { margin-bottom: 1.5rem; }
