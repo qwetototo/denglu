@@ -14,8 +14,7 @@ spring:
     # MySQL 驱动
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 数据库连接 URL（默认本地开发，Docker 部署时通过环境变量覆盖）
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mydb}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    # 数据库用户名
+    url: jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:mydb}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true    # 数据库用户名
     username: ${DB_USERNAME:root}
     # 数据库密码（请改成你的密码）
     password: ${DB_PASSWORD:123456}
