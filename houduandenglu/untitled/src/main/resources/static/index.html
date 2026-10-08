@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户登录</title>
+  <!-- 引入外部样式 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 登录卡片 -->
+  <div class="card">
+    <h2>🔐 用户登录</h2>
+
+    <!-- 登录表单 -->
+    <form id="loginForm">
+      <!-- 用户名输入 -->
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" placeholder="请输入用户名" autocomplete="username" required>
+      </div>
+
+      <!-- 密码输入 -->
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" placeholder="请输入密码" autocomplete="current-password" required>
+      </div>
+
+      <!-- 提交按钮 -->
+      <button type="submit" id="submitBtn" class="btn">登录</button>
+    </form>
+
+    <!-- 消息提示区域 -->
+    <div id="message" class="message"></div>
+  </div>
+
+  <!-- 引入登录逻辑脚本 -->
+  <script src="js/login.js"></script>
+</body>
+</html>

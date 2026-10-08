@@ -1,0 +1,64 @@
+# 服务配置
+server:
+  port: ${SERVER_PORT:18081}
+
+# Spring 配置
+spring:
+  application:
+    name: login-demo
+
+  # ========== 数据源配置 ==========
+  datasource:
+    # 使用 Druid 连接池
+    type: com.alibaba.druid.pool.DruidDataSource
+    # MySQL 驱动
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 数据库连接 URL（默认本地开发，Docker 部署时通过环境变量覆盖）
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mydb}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    # 数据库用户名
+    username: ${DB_USERNAME:root}
+    # 数据库密码（请改成你的密码）
+    password: ${DB_PASSWORD:123456}
+    # Druid 连接池参数
+    druid:
+      # 初始化连接数
+      initial-size: 5
+      # 最小空闲连接数
+      min-idle: 5
+      # 最大活跃连接数
+      max-active: 20
+      # 获取连接等待超时时间（毫秒）
+      max-wait: 60000
+      # 连接有效性检测
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+# ========== MyBatis-Plus 配置 ==========
+mybatis-plus:
+  # Mapper XML 文件位置（本项目用注解方式，可留空）
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包
+  type-aliases-package: com.example.login.entity
+  # 全局配置
+  global-config:
+    db-config:
+      # 主键类型：AUTO 表示数据库自增
+      id-type: auto
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑删除值（已删除）
+      logic-delete-value: 1
+      # 逻辑未删除值
+      logic-not-delete-value: 0
+  # 打印 SQL 日志，方便调试
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 开启驼峰命名转换（数据库 create_time -> 实体 createTime）
+    map-underscore-to-camel-case: true
+
+# 日志配置
+logging:
+  level:
+    com.example.login: debug
