@@ -4,6 +4,7 @@ import org.example.VO.LoginVO;
 import org.example.VO.UserVO;
 import org.example.common.ResultCode;
 import org.example.dto.LoginDTO;
+import org.example.dto.RegisterDTO;
 import org.example.entity.User;
 import org.example.exception.BusinessException;
 import org.example.mapper.UserMapper;
@@ -60,6 +61,21 @@ public class UserServiceImpl implements UserService {
 
         log.info("用户登录成功: {} ({})", username, user.getName());
         return loginVO;
+    }
+
+    @Override
+    public void register(RegisterDTO registerDTO) {
+        String username = registerDTO.getUsername().trim();
+        if (userMapper.findByUsername(username).isPresent()) {
+            throw new BusinessException(ResultCode.USERNAME_EXISTS);
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(registerDTO.getPassword());
+        user.setName(registerDTO.getName().trim());
+        userMapper.insert(user);
+        log.info("用户注册成功: {}", username);
     }
 
 }

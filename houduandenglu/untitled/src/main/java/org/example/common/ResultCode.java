@@ -18,6 +18,9 @@ public enum ResultCode {
     /** 用户名或密码错误 */
     LOGIN_FAILED(401, "用户名或密码错误"),
 
+    /** 用户名已存在 */
+    USERNAME_EXISTS(409, "用户名已存在"),
+
     /** 未登录 / token 无效 */
     UNAUTHORIZED(403, "未登录或登录已过期"),
 
